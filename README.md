@@ -16,19 +16,33 @@
 
 ---
 
+<!--
+=============================================================================
+  SECTION OWNER: TEAMMATE 2 — PROBLEM STATEMENT
+  Edit everything between this block and the next section marker.
+=============================================================================
+-->
+
 ## 🚨 Problem Statement
 
 India welcomes millions of international tourists every year, yet navigating the country remains one of the most overwhelming experiences for foreign visitors. Despite holding a valid visa, tourists frequently face critical challenges:
 
-- **Lack of centralized, reliable information** — Travel information is scattered across dozens of unverified websites, outdated blogs, and unofficial apps, making it hard for tourists to plan safely and efficiently.
-- **Language and cultural barriers** — India has 22 official languages and hundreds of dialects. Foreign tourists often struggle to communicate, understand local customs, or read signage.
-- **Safety concerns** — Tourists, especially solo travellers and women, face risks ranging from scams and overcharging to genuine emergencies, with no single point of contact for help.
-- **Visa and regulatory confusion** — Tourists are often unaware of restricted areas, e-visa conditions, photography bans, and region-specific entry rules, leading to inadvertent violations.
-- **No government-integrated support** — There is no direct, real-time link between a tourist's visit and government databases, embassies, or local law enforcement, leaving tourists unsupported during crises.
+- *Lack of centralized, reliable information* — Travel information is scattered across dozens of unverified websites, outdated blogs, and unofficial apps, making it hard for tourists to plan safely and efficiently.
+- *Language and cultural barriers* — India has 22 official languages and hundreds of dialects. Foreign tourists often struggle to communicate, understand local customs, or read signage.
+- *Safety concerns* — Tourists, especially solo travellers and women, face risks ranging from scams and overcharging to genuine emergencies, with no single point of contact for help.
+- *Visa and regulatory confusion* — Tourists are often unaware of restricted areas, e-visa conditions, photography bans, and region-specific entry rules, leading to inadvertent violations.
+- *No government-integrated support* — There is no direct, real-time link between a tourist's visit and government databases, embassies, or local law enforcement, leaving tourists unsupported during crises.
 
-**Our Solution:** *IndiaGuide* bridges this gap by building a government-integrated, open-source web platform that serves as a single, trusted companion for every tourist visiting India — from landing at the airport to safely completing their journey.
+*Our Solution:* IndiaGuide bridges this gap by building a government-integrated, open-source web platform that serves as a single, trusted companion for every tourist visiting India — from landing at the airport to safely completing their journey.
 
 ---
+
+<!--
+=============================================================================
+  SECTION OWNER: TEAMMATE 3 — FEATURES & IMPLEMENTATION
+  Edit everything between this block and the next section marker.
+=============================================================================
+-->
 
 ## ✨ Features & Implementation
 
@@ -53,7 +67,7 @@ India welcomes millions of international tourists every year, yet navigating the
 - **Women Safety Mode** — Shows women-only transport options, safe accommodation, and nearby women helpline numbers.
 
 ### 🌐 4. Multilingual Support
-- Full UI available in **10+ languages** covering major tourist demographics (English, French, German, Mandarin, Japanese, Spanish, Arabic, Russian, Korean, Portuguese).
+- Full UI available in **10+ languages** covering major tourist demographics (English, French, German, Mandarin, Japanese, Arabic, Russian, Korean, Portuguese).
 - **Real-time translation** of local signage via phone camera (OCR + Translation API).
 
 ### 📍 5. Destination Explorer
@@ -86,6 +100,13 @@ India welcomes millions of international tourists every year, yet navigating the
 | Phase 5 | Testing, accessibility audit, and deployment | Week 5 |
 
 ---
+
+<!--
+=============================================================================
+  SECTION OWNER: TEAMMATE 1 — TECH STACK
+  Edit everything between this block and the next section marker.
+=============================================================================
+-->
 
 ## 🛠️ Tech Stack
 
@@ -137,9 +158,9 @@ IndiaGuide is built as a **fully open-source web application**.
 
 | Name | Role | GitHub |
 |------|------|--------|
-| Nikhil Karur | Team Lead / Tech Stack | [@Nikhilkarur](https://github.com/Nikhilkarur) |
-| Abhiram | Features & Implementation | [@abhirambuilds](https://github.com/abhirambuilds) |
-| Manoj Kasyap | Problem Statement / Research | [@manojkasyap29](https://github.com/manojkasyap29) |
+| Nikhil Karur | Team Lead / Database & Backend | [@Nikhilkarur](https://github.com/Nikhilkarur) |
+| Raghu Prasad Manoj Kasyap | Backend Development | [@manojkasyap29](https://github.com/manojkasyap29) |
+| Abhiram | Frontend Development | [@abhirambuilds](https://github.com/abhirambuilds) |
 
 ---
 
