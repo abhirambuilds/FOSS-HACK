@@ -70,6 +70,41 @@ While general-purpose AI is powerful, **NutriScan is purpose-built for speed and
 
 ---
 
+## 🏗️ Proposed Implementation Plan
+
+### 1. High-Level Folder Structure
+To keep concerns separated, the project is structured into a React frontend and a Python backend:
+```text
+FOSS HACK/
+├── backend/                   # Python FastAPI Server (ML/OCR Engine)
+│   ├── main.py                # Entry point for the API
+│   ├── database.py            # PostgreSQL connection setup
+│   ├── models.py              # SQLAlchemy Data Models
+│   ├── ocr_engine.py          # Functions to process images with Tesseract
+│   ├── nlp_parser.py          # Functions to clean text with spaCy
+│   └── requirements.txt       # Python dependencies
+│
+├── frontend/                  # React Web App
+│   ├── src/
+│   │   ├── App.jsx            # Main routing component
+│   │   ├── components/        # CameraView, ResultCard, AlertBadge
+│   │   └── pages/             # Home, ScanPage, ProfilePage
+│   └── package.json
+```
+
+### 2. Database Schema (PostgreSQL)
+We need three primary tables to make the MVP work:
+*   **Users**: Stores the custom profile for Personalization & Allergy alerts (e.g., "Vegan", "Keto").
+*   **Ingredients**: Our curated FOSS dictionary of foods with health scores (-1 to 1), descriptions, and flags.
+*   **User_Allergies**: Maps a User to specific ingredient flags they want to avoid (e.g., "dairy", "peanut", "artificial").
+
+### 3. API Endpoints Contract (FastAPI)
+The frontend app will communicate with the backend via:
+*   `POST /api/scan`: Uploads the image and `user_id`. Runs the image through OpenCV -> Tesseract -> spaCy -> Database Match. Returns found ingredients, allergy alerts, and an overall health verdict.
+*   `GET /api/user/{user_id}`: Retrieves the user's dietary preferences and specific allergy restrictions.
+
+---
+
 ## 🚀 Getting Started (Local Development)
 
 *(Note: These are placeholder instructions while the project is in active development)*
