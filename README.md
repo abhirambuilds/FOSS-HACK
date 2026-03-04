@@ -103,4 +103,47 @@ The frontend app will communicate with the backend via:
 *   `GET /api/user/{user_id}`: Retrieves the user's dietary preferences and specific allergy restrictions.
 
 ---
+## 🚀 Getting Started (Local Development)
 
+*(Note: These are placeholder instructions while the project is in active development)*
+
+### Prerequisites
+*   Python 3.10+
+*   Node.js (for frontend)
+*   Tesseract OCR installed on your system
+
+### Installation Steps
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/nutriscan.git
+   cd nutriscan
+   ```
+
+2. **Set up the Backend:**
+   ```bash
+   cd backend
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   uvicorn main:app --reload
+   ```
+
+3. **Set up the Frontend:**
+   ```bash
+   cd ../frontend
+   npm install
+   npm run dev
+   ```
+
+4. **Run the App:** Open `http://localhost:3000` in your browser.
+
+---
+
+## 🤝 Contributing
+As a FOSS Hack project, we believe in building tools that empower users. Contributions, new feature ideas, and dataset improvements are more than welcome!
+*   Found a bug? Open an Issue.
+*   Have a dataset? Submit a PR.
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
