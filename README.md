@@ -91,5 +91,16 @@ FOSS HACK/
 │   │   └── pages/             # Home, ScanPage, ProfilePage
 │   └── package.json
 ```
+### 2. Database Schema (PostgreSQL)
+We need three primary tables to make the MVP work:
+*   **Users**: Stores the custom profile for Personalization & Allergy alerts (e.g., "Vegan", "Keto").
+*   **Ingredients**: Our curated FOSS dictionary of foods with health scores (-1 to 1), descriptions, and flags.
+*   **User_Allergies**: Maps a User to specific ingredient flags they want to avoid (e.g., "dairy", "peanut", "artificial").
 
+### 3. API Endpoints Contract (FastAPI)
+The frontend app will communicate with the backend via:
+*   `POST /api/scan`: Uploads the image and `user_id`. Runs the image through OpenCV -> Tesseract -> spaCy -> Database Match. Returns found ingredients, allergy alerts, and an overall health verdict.
+*   `GET /api/user/{user_id}`: Retrieves the user's dietary preferences and specific allergy restrictions.
+
+---
 
