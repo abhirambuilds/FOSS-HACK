@@ -37,22 +37,21 @@ async def scan_product(
     # Step 2: Parse ingredients from the OCR text using spaCy
     ingredients = clean_ingredient_text(raw_text)
 
-    # Step 3: Look up each ingredient in the DB to get health scores / flags
+    from cache import get_cached_ingredient_data
+
+    # Step 3: Look up each ingredient in the DB/Cache to get health scores / flags
     allergy_alerts = []
     total_score = 0.0
     matched_count = 0
 
     for ingredient in ingredients:
-        row = (
-            db.query(models.IngredientData)
-            .filter(models.IngredientData.name.ilike(f"%{ingredient}%"))
-            .first()
-        )
-        if row:
-            total_score += row.health_score
+        cached_data = get_cached_ingredient_data(db, ingredient)
+        
+        if cached_data:
+            total_score += cached_data["health_score"]
             matched_count += 1
-            if row.flags:
-                allergy_alerts.append(f"{row.name}: {row.flags}")
+            if cached_data["flags"]:
+                allergy_alerts.append(f"{cached_data['name']}: {cached_data['flags']}")
 
     health_score = round(total_score / matched_count, 2) if matched_count > 0 else 0.0
 
