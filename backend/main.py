@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 import models
 from database import engine, get_db
 from ocr_engine import extract_text_from_image
-from nlp_parser import clean_ingredient_text
+from nlp_parser import clean_ingredient_text, parse_nutrition_facts
 import user_routes
 import history_routes
 
@@ -34,8 +34,9 @@ async def scan_product(
     image_bytes = await file.read()
     raw_text = extract_text_from_image(image_bytes)
 
-    # Step 2: Parse ingredients from the OCR text using spaCy
+    # Step 2: Parse ingredients and nutrition facts from the OCR text
     ingredients = clean_ingredient_text(raw_text)
+    nutrition = parse_nutrition_facts(raw_text)
 
     from cache import get_cached_ingredient_data
 
@@ -68,6 +69,15 @@ async def scan_product(
             product_name=product_name,
             health_score=health_score,
             verdict=verdict,
+            calories=nutrition.get("calories"),
+            fat_g=nutrition.get("fat_g"),
+            sat_fat_g=nutrition.get("sat_fat_g"),
+            trans_fat_g=nutrition.get("trans_fat_g"),
+            sodium_mg=nutrition.get("sodium_mg"),
+            carbs_g=nutrition.get("carbs_g"),
+            fiber_g=nutrition.get("fiber_g"),
+            sugar_g=nutrition.get("sugar_g"),
+            protein_g=nutrition.get("protein_g"),
         )
         db.add(scan_entry)
         db.commit()
@@ -77,4 +87,5 @@ async def scan_product(
         "allergy_alerts": allergy_alerts,
         "health_score": health_score,
         "verdict": verdict,
+        "nutrition_facts": nutrition,
     }
