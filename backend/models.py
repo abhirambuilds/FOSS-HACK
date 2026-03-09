@@ -6,6 +6,7 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
+    hashed_password = Column(String, nullable=False)
     dietary_preference = Column(String, nullable=True)
 
 class IngredientData(Base):
