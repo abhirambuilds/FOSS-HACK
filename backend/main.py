@@ -8,6 +8,7 @@ from ocr_engine import extract_text_from_image
 from nlp_parser import clean_ingredient_text, parse_nutrition_facts
 import user_routes
 import history_routes
+import analytics_routes
 
 # Create tables if they don't exist yet
 models.Base.metadata.create_all(bind=engine)
@@ -16,6 +17,7 @@ app = FastAPI(title="NutriScan API", description="Backend for the NutriScan App"
 
 app.include_router(user_routes.router, prefix="/api")
 app.include_router(history_routes.router, prefix="/api")
+app.include_router(analytics_routes.router, prefix="/api")
 
 
 @app.get("/")
@@ -44,6 +46,7 @@ async def scan_product(
     allergy_alerts = []
     total_score = 0.0
     matched_count = 0
+    scanned_ing_models = []
 
     for ingredient in ingredients:
         cached_data = get_cached_ingredient_data(db, ingredient)
@@ -53,6 +56,10 @@ async def scan_product(
             matched_count += 1
             if cached_data["flags"]:
                 allergy_alerts.append(f"{cached_data['name']}: {cached_data['flags']}")
+            
+            ing_model = db.query(models.IngredientData).filter(models.IngredientData.name == cached_data["name"]).first()
+            if ing_model:
+                scanned_ing_models.append(ing_model)
 
     health_score = round(total_score / matched_count, 2) if matched_count > 0 else 0.0
 
@@ -78,6 +85,7 @@ async def scan_product(
             fiber_g=nutrition.get("fiber_g"),
             sugar_g=nutrition.get("sugar_g"),
             protein_g=nutrition.get("protein_g"),
+            ingredients=scanned_ing_models
         )
         db.add(scan_entry)
         db.commit()
@@ -114,6 +122,7 @@ def scan_barcode(
     allergy_alerts = []
     total_score = 0.0
     matched_count = 0
+    scanned_ing_models = []
 
     for ingredient in ingredients:
         cached_data = get_cached_ingredient_data(db, ingredient)
@@ -123,6 +132,10 @@ def scan_barcode(
             matched_count += 1
             if cached_data["flags"]:
                 allergy_alerts.append(f"{cached_data['name']}: {cached_data['flags']}")
+            
+            ing_model = db.query(models.IngredientData).filter(models.IngredientData.name == cached_data["name"]).first()
+            if ing_model:
+                scanned_ing_models.append(ing_model)
 
     health_score = round(total_score / matched_count, 2) if matched_count > 0 else 0.0
 
@@ -139,6 +152,7 @@ def scan_barcode(
             product_name=product_data.get("product_name"),
             health_score=health_score,
             verdict=verdict,
+            ingredients=scanned_ing_models
         )
         db.add(scan_entry)
         db.commit()
