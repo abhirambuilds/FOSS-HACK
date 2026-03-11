@@ -13,6 +13,7 @@ from nlp_parser import clean_ingredient_text, parse_nutrition_facts
 import user_routes
 import history_routes
 import analytics_routes
+import suggestion_routes
 
 # Create tables if they don't exist yet
 models.Base.metadata.create_all(bind=engine)
@@ -36,6 +37,7 @@ app.add_middleware(
 app.include_router(user_routes.router, prefix="/api")
 app.include_router(history_routes.router, prefix="/api")
 app.include_router(analytics_routes.router, prefix="/api")
+app.include_router(suggestion_routes.router, prefix="/api")
 
 
 @app.get("/")
@@ -111,12 +113,19 @@ async def scan_product(
         db.add(scan_entry)
         db.commit()
 
+    suggested_alternatives = []
+    if verdict == "Unhealthy":
+        from suggestion_routes import get_healthy_alternatives
+        bad = ingredients[0] if ingredients else None
+        suggested_alternatives = get_healthy_alternatives(db, bad_ingredient=bad)
+
     return {
         "ingredients_detected": ingredients,
         "allergy_alerts": allergy_alerts,
         "health_score": health_score,
         "verdict": verdict,
         "nutrition_facts": nutrition,
+        "suggested_alternatives": suggested_alternatives,
     }
 
 
