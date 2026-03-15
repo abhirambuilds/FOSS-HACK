@@ -2,11 +2,85 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 from typing import List
+from datetime import datetime, timedelta
 
 import models
 from database import get_db
 
 router = APIRouter()
+
+
+@router.get("/analytics/{user_id}/weekly")
+def get_weekly_goal_summary(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    today = datetime.utcnow().date()
+    start_date = today - timedelta(days=6)
+    start_dt = datetime.combine(start_date, datetime.min.time())
+
+    weekly_rows = (
+        db.query(
+            func.date(models.ScanHistory.created_at).label("scan_date"),
+            func.coalesce(func.sum(models.ScanHistory.calories), 0.0).label("calories"),
+            func.coalesce(func.sum(models.ScanHistory.protein_g), 0.0).label("protein_g"),
+            func.coalesce(func.sum(models.ScanHistory.fat_g), 0.0).label("fat_g"),
+            func.coalesce(func.sum(models.ScanHistory.carbs_g), 0.0).label("carbs_g"),
+        )
+        .filter(models.ScanHistory.user_id == user_id)
+        .filter(models.ScanHistory.created_at >= start_dt)
+        .group_by(func.date(models.ScanHistory.created_at))
+        .all()
+    )
+
+    date_totals = {
+        str(scan_date): {
+            "calories": float(calories or 0.0),
+            "protein_g": float(protein_g or 0.0),
+            "fat_g": float(fat_g or 0.0),
+            "carbs_g": float(carbs_g or 0.0),
+        }
+        for scan_date, calories, protein_g, fat_g, carbs_g in weekly_rows
+    }
+
+    last_7_days = []
+    for day_offset in range(7):
+        current_date = start_date + timedelta(days=day_offset)
+        current_date_str = current_date.isoformat()
+        totals = date_totals.get(
+            current_date_str,
+            {
+                "calories": 0.0,
+                "protein_g": 0.0,
+                "fat_g": 0.0,
+                "carbs_g": 0.0,
+            },
+        )
+
+        last_7_days.append(
+            {
+                "date": current_date_str,
+                "calories": totals["calories"],
+                "protein_g": totals["protein_g"],
+                "fat_g": totals["fat_g"],
+                "carbs_g": totals["carbs_g"],
+            }
+        )
+
+    return {
+        "user_id": user_id,
+        "target_goals": {
+            "calories": float(user.target_calories or 0.0),
+            "protein_g": float(user.target_protein or 0.0),
+            "fat_g": float(user.target_fat or 0.0),
+            "carbs_g": float(user.target_carbs or 0.0),
+        },
+        "last_7_days": last_7_days,
+    }
 
 @router.get("/analytics/{user_id}")
 def get_user_analytics(
