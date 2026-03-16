@@ -119,6 +119,7 @@ async def scan_product(
     file: UploadFile = File(...),
     user_id: Optional[int] = Form(None),
     product_name: Optional[str] = Form(None),
+    alert_keyword: Optional[str] = Form(None),
     db: Session = Depends(get_db),
 ):
     # Step 1: Extract raw text from the uploaded image via OCR
@@ -145,6 +146,12 @@ async def scan_product(
             matched_count += 1
             if cached_data["flags"]:
                 allergy_alerts.append(f"{cached_data['name']}: {cached_data['flags']}")
+            
+            # Advanced OCR Filter: Check for custom alert keyword
+            if alert_keyword:
+                keyword_lower = alert_keyword.lower()
+                if keyword_lower in ingredient.lower() or keyword_lower in cached_data["name"].lower() or (cached_data["flags"] and keyword_lower in cached_data["flags"].lower()):
+                    allergy_alerts.append("CRITICAL ALERT")
             
             ing_model = db.query(models.IngredientData).filter(models.IngredientData.name == cached_data["name"]).first()
             if ing_model:
