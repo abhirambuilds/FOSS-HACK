@@ -25,6 +25,10 @@ class UserGoalsUpdate(BaseModel):
     target_fat: Optional[float] = None
     target_carbs: Optional[float] = None
 
+class UserProfileUpdate(BaseModel):
+    display_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+
 class UserGoalsResponse(BaseModel):
     target_calories: Optional[float] = None
     target_protein: Optional[float] = None
@@ -35,6 +39,8 @@ class UserGoalsResponse(BaseModel):
 class UserResponse(BaseModel):
     id: int
     username: str
+    display_name: Optional[str] = None
+    avatar_url: Optional[str] = None
     dietary_preference: Optional[str] = None
     current_streak: int
 
@@ -120,6 +126,27 @@ def update_user_goals(
         db_user.target_fat = goals.target_fat
     if goals.target_carbs is not None:
         db_user.target_carbs = goals.target_carbs
+
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+@router.put("/users/{user_id}/profile", response_model=UserResponse)
+def update_user_profile(
+    user_id: int,
+    profile: UserProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if current_user.id != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
+
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    db_user.display_name = profile.display_name
+    db_user.avatar_url = profile.avatar_url
 
     db.commit()
     db.refresh(db_user)
