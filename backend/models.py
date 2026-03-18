@@ -39,6 +39,7 @@ class ScanHistory(Base):
     product_name = Column(String, nullable=True)
     health_score = Column(Float, nullable=False)
     verdict = Column(String, nullable=False)
+    share_token = Column(String, nullable=True, unique=True)
 
     # Added relationship
     ingredients = relationship("IngredientData", secondary=scan_ingredients_association)

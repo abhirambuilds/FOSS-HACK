@@ -1,4 +1,6 @@
 from io import BytesIO
+import secrets
+import string
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -100,3 +102,40 @@ def export_scan_history_pdf(
             "Content-Disposition": f"attachment; filename=nutriscan_report_{user_id}.pdf"
         },
     )
+
+
+@router.post("/history/{scan_id}/share")
+def generate_share_link(
+    scan_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    scan = db.query(models.ScanHistory).filter(models.ScanHistory.id == scan_id).first()
+    if not scan:
+        raise HTTPException(status_code=404, detail="Scan not found")
+    
+    if scan.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
+
+    # Generate random 10-char alphanumeric token
+    alphabet = string.ascii_letters + string.digits
+    token = "".join(secrets.choice(alphabet) for _ in range(10))
+
+    scan.share_token = token
+    db.commit()
+    db.refresh(scan)
+
+    return {"share_token": token}
+
+
+@router.get("/history/shared/{token}")
+def get_shared_scan(token: str, db: Session = Depends(get_db)):
+    scan = db.query(models.ScanHistory).filter(models.ScanHistory.share_token == token).first()
+    if not scan:
+        raise HTTPException(status_code=404, detail="Shared scan not found")
+
+    return {
+        "product_name": scan.product_name,
+        "health_score": scan.health_score,
+        "verdict": scan.verdict,
+    }
