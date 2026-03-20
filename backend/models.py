@@ -63,3 +63,13 @@ class Notification(Base):
     message = Column(String, nullable=False)
     is_read = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class BarcodeCache(Base):
+    __tablename__ = "barcode_cache"
+    id = Column(Integer, primary_key=True, index=True)
+    barcode = Column(String, unique=True, index=True)
+    product_name = Column(String, nullable=True)
+    health_score = Column(Float, nullable=False)
+    verdict = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+

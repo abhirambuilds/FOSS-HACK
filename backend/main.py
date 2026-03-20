@@ -209,11 +209,43 @@ def scan_barcode(
     from cache import get_cached_ingredient_data
     from nlp_parser import clean_ingredient_text
     
+    # 1. Check local DB cache first for faster response
+    cached_barcode = db.query(models.BarcodeCache).filter(models.BarcodeCache.barcode == barcode).first()
+    if cached_barcode:
+        if user_id is not None:
+            # We still log the history entry for the user
+            scan_entry = models.ScanHistory(
+                user_id=user_id,
+                product_name=cached_barcode.product_name,
+                health_score=cached_barcode.health_score,
+                verdict=cached_barcode.verdict
+            )
+            db.add(scan_entry)
+            db.commit()
+            
+            # Trigger notification logic if unhealthy
+            if cached_barcode.verdict == "Unhealthy":
+                notification = models.Notification(
+                    user_id=user_id,
+                    message=f"You scanned an unhealthy product (cached): {cached_barcode.product_name or 'Unknown'}",
+                )
+                db.add(notification)
+                db.commit()
+                
+        return {
+            "cached": True,
+            "product_name": cached_barcode.product_name,
+            "health_score": cached_barcode.health_score,
+            "verdict": cached_barcode.verdict,
+        }
+        
+    # 2. If not found locally, fetch from external OpenFoodFacts API
     product_data = fetch_product_by_barcode(barcode)
     if not product_data:
         return {"error": "Product not found"}
         
     ingredients_text = product_data.get("ingredients_text", "")
+    prod_name = product_data.get("product_name", "Unknown Product")
     
     # Process ingredients using existing NLP parser
     # We prefix with 'Ingredients: ' so the parser's regex match works
@@ -245,6 +277,16 @@ def scan_barcode(
         verdict = "Moderate"
     else:
         verdict = "Unhealthy"
+
+    # Save to global Barcode Cache so next user gets it instantly
+    new_cache_entry = models.BarcodeCache(
+        barcode=barcode,
+        product_name=prod_name,
+        health_score=health_score,
+        verdict=verdict
+    )
+    db.add(new_cache_entry)
+    db.commit()
 
     if user_id is not None:
         scan_entry = models.ScanHistory(
