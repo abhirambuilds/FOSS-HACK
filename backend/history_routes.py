@@ -1,3 +1,4 @@
+from typing import List, Dict
 from io import BytesIO
 import secrets
 import string
@@ -139,3 +140,37 @@ def get_shared_scan(token: str, db: Session = Depends(get_db)):
         "health_score": scan.health_score,
         "verdict": scan.verdict,
     }
+
+
+@router.post("/history/{user_id}/sync")
+def sync_scan_history(
+    user_id: int,
+    items: List[Dict],
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    if current_user.id != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized")
+
+    for item in items:
+        nutrition = item.get("nutrition_data") or {}
+        new_scan = models.ScanHistory(
+            user_id=user_id,
+            product_name=item.get("product_name"),
+            health_score=item.get("health_score"),
+            verdict=item.get("verdict"),
+            calories=nutrition.get("calories"),
+            fat_g=nutrition.get("fat_g"),
+            sat_fat_g=nutrition.get("sat_fat_g"),
+            trans_fat_g=nutrition.get("trans_fat_g"),
+            sodium_mg=nutrition.get("sodium_mg"),
+            carbs_g=nutrition.get("carbs_g"),
+            fiber_g=nutrition.get("fiber_g"),
+            sugar_g=nutrition.get("sugar_g"),
+            protein_g=nutrition.get("protein_g"),
+        )
+        db.add(new_scan)
+
+    db.commit()
+    return {"detail": f"{len(items)} scans synced successfully"}
+
