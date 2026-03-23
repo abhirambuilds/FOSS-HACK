@@ -29,6 +29,10 @@ class UserProfileUpdate(BaseModel):
     display_name: Optional[str] = None
     avatar_url: Optional[str] = None
     dietary_preference: Optional[str] = None
+    age: Optional[int] = None
+    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = None
+    gender: Optional[str] = None
 
 class UserGoalsResponse(BaseModel):
     target_calories: Optional[float] = None
@@ -44,6 +48,14 @@ class UserResponse(BaseModel):
     avatar_url: Optional[str] = None
     dietary_preference: Optional[str] = None
     current_streak: int
+    age: Optional[int] = None
+    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = None
+    gender: Optional[str] = None
+    target_calories: Optional[float] = None
+    target_protein: Optional[float] = None
+    target_fat: Optional[float] = None
+    target_carbs: Optional[float] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -152,6 +164,25 @@ def update_user_profile(
         db_user.avatar_url = profile.avatar_url
     if profile.dietary_preference is not None:
         db_user.dietary_preference = profile.dietary_preference
+    if profile.age is not None:
+        db_user.age = profile.age
+    if profile.weight_kg is not None:
+        db_user.weight_kg = profile.weight_kg
+    if profile.height_cm is not None:
+        db_user.height_cm = profile.height_cm
+    if profile.gender is not None:
+        db_user.gender = profile.gender
+
+    # Automatic BMR and target calories calculation
+    if db_user.weight_kg and db_user.height_cm and db_user.age:
+        # Mifflin-St Jeor Equation
+        if db_user.gender and db_user.gender.lower() == "female":
+            bmr = (10 * db_user.weight_kg) + (6.25 * db_user.height_cm) - (5 * db_user.age) - 161
+        else:
+            # Default to male formula
+            bmr = (10 * db_user.weight_kg) + (6.25 * db_user.height_cm) - (5 * db_user.age) + 5
+        
+        db_user.target_calories = round(bmr * 1.2, 2)
 
     db.commit()
     db.refresh(db_user)

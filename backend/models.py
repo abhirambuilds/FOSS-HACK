@@ -17,6 +17,10 @@ class User(Base):
     target_carbs = Column(Float, nullable=True)
     current_streak = Column(Integer, default=0)
     last_scan_date = Column(Date, nullable=True)
+    age = Column(Integer, nullable=True)
+    weight_kg = Column(Float, nullable=True)
+    height_cm = Column(Float, nullable=True)
+    gender = Column(String, nullable=True)
 
 class IngredientData(Base):
     __tablename__ = "ingredients"
